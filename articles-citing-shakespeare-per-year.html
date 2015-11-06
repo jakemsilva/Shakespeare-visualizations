@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Number of Articles Citing Shakespeare Per Year</title>
+    <style>
+        body{
+
+        }
+    </style>
+</head>
+<body>
+<div id="container" style="min-width: 200px; height: 700px; margin: 0 auto"></div>
+<!-- <div></div> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script src="http://code.highcharts.com/modules/funnel.js"></script>
+<script src="http://code.highcharts.com/modules/exporting.js"></script>
+
+<script>
+    $( document ).ready(function() {
+
+        $.ajaxSetup({headers: {"Authorization": "Token 4817042843ac4178c3149755c1a8b579632bc862"}});
+        $.getJSON("https://labs.jstor.org/api/shakespeare/",
+                {
+                    match_size:'[18 TO *]',
+                    similarity: '[0.9 TO *]',
+                    facet: 'pubyear.210v,docid[unique]',
+                },
+                function(resp){
+                    console.log(resp);
+                    var data = [];
+                    var cats = [];
+                    var topChar = [];
+                    for (var i = 0; i < resp.facets.pubyear.values.length; i++) {
+                        cats.push(resp.facets.pubyear.values[i].val);
+                        data.push(resp.facets.pubyear.values[i].docid.stats.unique);
+                    }
+                    /*data.sort(function(a, b){
+                     return b[1]-a[1]
+                     })*/
+                    console.log(cats)
+
+                    $(function () {
+                        $('#container').highcharts({
+                            chart: {
+                                type: 'area'
+                            },
+                            title: {
+                                text: '',
+                                x: -20 //center
+                            },
+                            subtitle: {
+                                text: 'Similarity threshold of 0.9 and a minimum match size of 18',
+                                x: -20
+                            },
+                            xAxis: {
+                                categories: cats,
+                                tickInterval: 10,
+                            },
+                            yAxis: {
+                                title: {
+                                    text: 'Number of Articles'
+                                },
+                                min: 0,
+                                plotLines: [{
+                                    value: 0,
+                                    width: 1,
+                                    color: '#808080'
+                                }]
+                            },
+                            legend: {
+                                layout: 'vertical',
+                                align: 'right',
+                                verticalAlign: 'middle',
+                                borderWidth: 0,
+                                enabled: false
+                            },
+                            series: [{
+                                name: 'Articles',
+                                data: data
+                            }]
+                        });
+                    });
+                }
+        );
+
+
+        function toTitleCase(e){
+            var t=/^(a|an|and|as|at|but|by|en|for|if|in|of|on|or|the|to|vs?\.?|via)$/i;
+            return e.replace(/([^\W_]+[^\s-]*) */g,function(e,n,r,i){
+                        return r>0&&r+n.length!==i.length&&n.search(t)>-1&&i.charAt(r-2)!==":"&&i.charAt(r-1).search(/[^\s-]/)<0?e.toLowerCase():n.substr(1).search(/[A-Z]|\../)>-1?e:e.charAt(0).toUpperCase()+e.substr(1)}
+            )
+        };
+    });
+
+
+</script>
+</body>
+</html>
