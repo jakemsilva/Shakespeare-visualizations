@@ -1,0 +1,659 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>JSTOR Labs Shakespeare API Heatmap of Speakers Visualization</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.3/css/foundation.min.css">
+    <style>
+        .title{
+            color: #990000;
+        }
+        table tr td{
+            font-size: 16px;
+            padding-bottom: 35px;
+        }
+        table tr td:first-child{
+            font-weight: bold;
+        }
+        .fullWidth {
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: initial;
+        }
+        #card_container{
+            padding: 0.5% 1% 0;
+            text-align: justify;
+            font-size: 0.1px;
+            /*background: #68b8c4;*/
+            -webkit-backface-visibility: hidden;
+        }
+
+        #card_container:after{
+            content: '';
+            display: inline-block;
+            width: 100%;
+        }
+
+        #card_container .mix,
+        #card_container .gap{
+            display: inline-block;
+            width: 100px;
+        }
+
+        #card_container .mix{
+            text-align: left;
+            /*background: #03899c;*/
+            margin-bottom: 0.3%;
+            display: none;
+        }
+
+
+        #card_container .mix:after{
+            content: attr(data-myorder);
+            color: white;
+            font-size: 16px;
+            display: inline-block;
+            vertical-align: top;
+            padding: 4% 6%;
+            font-weight: 700;
+        }
+
+        #card_container .mix:before{
+            content: '';
+            display: inline-block;
+            padding-top: 60%;
+        }
+        .overlay {
+            display: inline-block;
+            background:rgba(0, 0, 0, .5);
+            text-align:center;
+            opacity:0;
+            margin-top: -130px;
+            -webkit-transition: all 0.3s ease-in-out;
+            -moz-transition: all 0.3s ease-in-out;
+            -o-transition: all 0.3s ease-in-out;
+            -ms-transition: all 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out;
+            height: 100px;
+            width: 100px;
+            position: relative;
+            bottom: 60px;
+        }
+
+        .playNav p {
+            height: 100px;
+            font-size: 10pt;
+            line-height: 1.2em;
+            position: relative;
+            bottom: 60px;
+            text-decoration: none!important;
+            padding: .6em .6em .6em .6em;
+            z-index: 20;
+            margin-bottom: 0;
+        }
+
+        .playNav:hover {
+            color: #fff;
+        }
+
+        .playNav:hover .overlay {
+            opacity:1;
+        }
+
+        .playNav {
+            /*margin: 16px;*/
+            color: #ffffff;
+            width: 218px;
+            height: 100px;
+            display: inline-block;
+            overflow:hidden;
+        }
+        #playSearch {
+            background-color: white;
+            height: 40px;
+            width: 599px;
+            display: inline-block;
+            color: #5d5850;
+            font-size: 1.2em;
+            font-family: Arial, Helvetica, sans-serif;
+            padding-left: 12px;
+            float: left;
+            bottom: 2px;
+            border: 1px solid #5d5850;
+
+        }
+        .black {
+            color: #333;
+        }
+        .black:hover {
+            color: white!important;
+            -webkit-transition: all 0.3s ease-in-out;
+            -moz-transition: all 0.3s ease-in-out;
+            -o-transition: all 0.3s ease-in-out;
+            -ms-transition: all 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out;
+        }
+
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.3/js/vendor/modernizr.js"></script>
+
+</head>
+<body>
+<div class="row">
+
+
+</div>
+<div class="row fullWidth">
+    <div class="small-12 large-4 columns">
+        <h1 class="title"></h1>
+        <table id="">
+            <tr>
+                <td>Top Character Quoted:</td>
+                <td id="topChar"></td>
+            </tr>
+            <tr>
+                <td>Number of JSTOR Articles Quoting Play:</td>
+                <td id="numOfArt"></td>
+            </tr>
+            <tr>
+                <td>Top Line Quoted:</td>
+                <td id="topQuote"></td>
+
+            </tr>
+        </table>
+    </div>
+    <div id="chart" class="small-12 large-8 columns">
+        <div id="container" style=" margin: 0 auto"></div>
+    </div>
+</div>
+<div class="row fullWidth">
+    <div class="small-12 columns">
+        <div id="card_container" class="container">
+            <a href="/shakespeare/alls_well_that_ends_well" data-myorder="1" class="playNav mix comedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/All_well_that_ends_welI_218x218.jpg);">
+                <p>ALL'S WELL THAT ENDS WELL</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/antony_and_cleopatra" data-myorder="2" class="playNav mix tragedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Antony_and_Cleopatra218x218.jpg);">
+                <p>ANTONY AND CLEOPATRA</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/as_you_like_it" data-myorder="3" class="playNav mix comedies black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/As_You_Like_It_218x218.jpg);">
+                <p>AS YOU LIKE IT</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/the_comedy_of_errors" data-myorder="4" class="playNav mix comedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Comedy_of_Errors218x218.jpg);">
+                <p>THE COMEDY OF ERRORS</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/coriolanus" data-myorder="5" class="playNav mix tragedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Coriolanus218x218.jpg);">
+                <p>CORIOLANUS</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/cymbeline" data-myorder="6" class="playNav mix romances" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Cymbeline_218x218.jpg);">
+                <p>CYMBELINE</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/hamlet" data-myorder="7" class="playNav mix tragedies black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Hamlet_218x218.jpg);">
+                <p>HAMLET</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/henry_iv_part_1" data-myorder="8" class="playNav mix histories" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Henry_IV_P1218x218.jpg);">
+                <p>HENRY IV, PART I</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/henry_iv_part_2" data-myorder="9" class="playNav mix histories black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Henry_IV_P2218x218.jpg);">
+                <p>HENRY IV, PART II</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/henry_v" data-myorder="10" class="playNav mix histories" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Henry_V218x218.jpg);">
+                <p>HENRY V</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/henry_vi_part_1" data-myorder="11" class="playNav mix histories" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Henry_VI_P1218x218.jpg);">
+                <p>HENRY VI, PART I</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/henry_vi_part_2" data-myorder="12" class="playNav mix histories  black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Henry_VI_P2218x218.jpg);">
+                <p>HENRY VI, PART II</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/henry_vi_part_3" data-myorder="13" class="playNav mix histories" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Henry_VI_P3218x218.jpg);">
+                <p>HENRY VI, PART III</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/henry_viii" data-myorder="14" class="playNav mix histories" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Henry_VIII_218x218.jpg);">
+                <p>HENRY VIII</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/julius_caesar" data-myorder="15" class="playNav mix tragedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Julius_Caesar_218x218.jpg);">
+                <p>JULIUS CAESAR</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/king_john" data-myorder="16" class="playNav mix histories" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/King_John_218x218.jpg);">
+                <p>KING JOHN</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/king_lear" data-myorder="17" class="playNav mix histories  black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/King_Lear218x218.jpg);">
+                <p>KING LEAR</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/loves_labors_lost" data-myorder="18" class="playNav mix comedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Loves_Labours_Lost218x218.jpg);">
+                <p>LOVE'S LABOR'S LOST</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/macbeth" data-myorder="19" class="playNav mix tragedies black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Macbeth218x218.jpg);">
+                <p>MACBETH</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/measure_for_measure" data-myorder="20" class="playNav mix comedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Measure_for_Measure218x218.jpg);">
+                <p>MEASURE FOR MEASURE</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/merchant_of_venice" data-myorder="21" class="playNav mix comedies  black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Merchant_of_Venice218x218.jpg);">
+                <p>THE MERCHANT OF VENICE</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/the_merry_wives_of_windsor" data-myorder="22" class="playNav mix comedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Merry_Wives_Of_Windsor218x218.jpg);">
+                <p>THE MERRY WIVES OF WINDSOR</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/a_midsummer_nights_dream" data-myorder="23" class="playNav mix comedies black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/A_Midsummer218x218.jpg);">
+                <p>A MIDSUMMER NIGHT'S DREAM</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/much_ado_about_nothing" data-myorder="24" class="playNav mix comedies black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Much_Ado_About_Nothing218x218.jpg);">
+                <p>MUCH ADO ABOUT NOTHING</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/othello" data-myorder="25" class="playNav mix tragedies black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Othello_218x218.jpg);">
+                <p>OTHELLO</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/pericles" data-myorder="26" class="playNav mix romances black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Pericles218x218.jpg);">
+                <p>PERICLES</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/richard_ii" data-myorder="27" class="playNav mix histories" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Richard_II218x218.jpg);">
+                <p>RICHARD II</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/richard_iii" data-myorder="28" class="playNav mix histories" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Richard_III218x218.jpg);">
+                <p>RICHARD III</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/romeo_and_juliet" data-myorder="29" class="playNav mix tragedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Romeo_and_Juliet218x218.jpg);">
+                <p>ROMEO AND JULIET</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/taming_of_the_shrew" data-myorder="30" class="playNav mix comedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Taming_of_the_Shrew218x218.jpg);">
+                <p>THE TAMING OF THE SHREW</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/the_tempest" data-myorder="31" class="playNav mix romances" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/The_Tempest218x218.jpg);">
+                <p>THE TEMPEST</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/timon_of_athens" data-myorder="32" class="playNav mix tragedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Timon_of_Athens218x218.jpg);">
+                <p>TIMON OF ATHENS</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/titus_andronicus" data-myorder="33" class="playNav mix tragedies black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Titus_Andronicus218x218.jpg);">
+                <p>TITUS ANDRONICUS</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/troilus_and_cressida" data-myorder="34" class="playNav mix tragedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Troilus_and_Cressida218x218.jpg);">
+                <p>TROILUS AND CRESSIDA</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/twelfth_night" data-myorder="35" class="playNav mix comedies black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Twelfth_Night218x218.jpg);">
+                <p>TWELFTH NIGHT</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/two_gentlemen_of_verona" data-myorder="36" class="playNav mix comedies black" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Two_Gentlemen_of_Verona218x218.jpg);">
+                <p>THE TWO GENTLEMEN OF VERONA</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/two_noble_kinsmen" data-myorder="37" class="playNav mix comedies" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Two_Noble_Kinsmen_218x218.jpg);">
+                <p>THE TWO NOBLE KINSMEN</p><div class="overlay"></div></a>
+
+            <a href="/shakespeare/the_winters_tale" data-myorder="38" class="playNav mix romances" style="display: inline-block; background-image: url(https://labs.jstor.org/static/shakespeare/images/Winters_Tale218x218.jpg);">
+                <p>THE WINTER'S TALE</p><div class="overlay"></div></a>
+
+            <a class="gap"></a>
+            <a class="gap"></a>
+            <a class="gap"></a>
+            <a class="gap"></a>
+            <a class="gap"></a>
+            <a class="gap"></a>
+            <a class="gap"></a>
+            <a class="gap"></a>
+            <a class="gap"></a>
+            <a class="gap"></a>
+            <a class="gap"></a>
+            <a class="gap"></a>
+            <a class="gap"></a>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/heatmap.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<script>
+    $( document ).ready(function() {
+        $.ajaxSetup({headers: {"Authorization": "Token 4817042843ac4178c3149755c1a8b579632bc862"}});
+        dataService('hamlet');
+
+        $('.playNav').click(function(event){
+            event.preventDefault();
+            var url = $(this).attr("href");
+            var page = convertUrl(url);
+            dataService(page);
+
+           // $(document).scrollTop($("#chart").offset().top -50);
+        });
+
+        function toTitleCase(e){
+            var t=/^(a|an|and|as|at|but|by|en|for|if|in|of|on|or|the|to|vs?\.?|via)$/i;
+            return e.replace(/([^\W_]+[^\s-]*) */g,function(e,n,r,i){
+                        return r>0&&r+n.length!==i.length&&n.search(t)>-1&&i.charAt(r-2)!==":"&&i.charAt(r-1).search(/[^\s-]/)<0?e.toLowerCase():n.substr(1).search(/[A-Z]|\../)>-1?e:e.charAt(0).toUpperCase()+e.substr(1)}
+            )
+        };
+
+        function getPlayFromUrl(){
+            var myParam = location.search.split('p=')[1];
+            return myParam;
+        }
+
+        function getAct(act, firstAct){
+            if(firstAct == 0){
+                return act;
+            }
+            return act - 1;
+        }
+
+        function convertUrl(url){
+            var str = url.split('/');
+            return str[2];
+        }
+
+        function testforUnspecificied(arr,val) {
+            for (var i=0; i<arr.length; i++) {
+                if (arr[i].val === val)
+                    return i;
+            }
+            return false;
+        }
+
+        function chooseLine(arr) {
+            var longest = 0;
+            var shortest = arr[0].val.length;
+            var shortestLine = arr[0].val;
+            for (var i = 0; i < arr.length; i++) {
+                var line = arr[i].val;
+                //find longest line
+                if (line.length > longest) {
+                    longest = line.length
+                    var longestLine = line;
+                }
+                //find shortest line
+                if (line.length < shortest) {
+                    shortest = line.length;
+                    var shortestLine = line;
+                }
+            }
+            //find position of shortest line within longest line
+            var n = longestLine.indexOf(shortestLine);
+            //if line not found
+            if(n == -1){
+                /*var longestv = longest;
+                 finished = false;
+                 console.log('executing')
+                 while(finished != true){
+                 var newLine = findSubLine(arr, longestv);
+                 n = newLine.indexOf(shortestLine);
+                 if(n == -1){
+                 longestv = newLine.length;
+                 }
+                 else{
+                 var x = newLine.substr(n);
+                 console.log('executed-2')
+                 finished = true;
+                 }
+                 }*/
+                var secondLine = findSubLine(arr, longest);
+                n = secondLine.indexOf(shortestLine);
+                if(n == -1){
+                    var x = longestLine;
+                }
+                else{
+                    var x = secondLine.substr(n);
+                }
+            }
+            else {
+                //take string from starting point of shortest line
+                var x = longestLine.substr(n);
+            }
+            //split string by capitalization
+            var sentenceArray = x.split(/(?=[A-Z])/);
+            //If sentence not complete, fill in previous words to complete sentence
+            if (sentenceArray[0][0] == sentenceArray[0][0].toLowerCase()) {
+                line = sentenceArray[0];
+                do {
+                    var mWords = findPreviousWord(line.trim(), longestLine);
+                    if(!mWords){
+                        break;
+                    }
+                    var mWord = getFirstWord(mWords);
+                    line = mWords;
+
+                } while (mWord[0] == mWord[0].toLowerCase());
+                sentenceArray[0] = line;
+            }
+            //determine final quote by word count for each sentence
+            var totalWordCount = 0;
+            var finalWordCount = 0;
+            var finalQuote = [];
+            if(getWordCount(sentenceArray[0]) > 13){
+                finalQuote.push(sentenceArray[0]);
+            }
+            else {
+                for (i = 0; i < sentenceArray.length; i++) {
+                    totalWordCount += getWordCount(sentenceArray[i]);
+                    if (totalWordCount <= 13) {
+                        finalQuote.push(sentenceArray[i]);
+                        finalWordCount += getWordCount(sentenceArray[i]);
+                    }
+                }
+            }
+
+            if (finalQuote.length > 1 && getWordCount(finalQuote[finalQuote.length - 2]) > 2 && finalQuote[finalQuote.length - 1].length < 4) {
+                finalQuote.pop();
+            }
+            return finalQuote.join(" ");
+        }
+
+        function findSubLine(arr, val){
+            var longest = 0;
+            var max = val;
+            for (var i = 0; i < arr.length; i++) {
+                var line = arr[i].val;
+                //find second longest line
+                if (line.length > longest && line.length < max) {
+                    longest = line.length
+                    var longestLine = line;
+                }
+            }
+            return longestLine;
+        }
+
+        function getWordCount(val){
+            var regex = /\s+/gi;
+            var wordCount = val.trim().replace(regex, ' ').split(' ').length;
+            return wordCount;
+        }
+
+        function findPreviousWord(p,s){
+            reg = new RegExp("\\s?([^\\s]+\\s" + p + ")\\s?", "i");
+
+            return s.match(reg) && s.match(reg)[1];
+        }
+
+        function getFirstWord(str) {
+            if (str.indexOf(' ') === -1)
+                return str;
+            else
+                return str.substr(0, str.indexOf(' '));
+        };
+
+        function dataService(play){
+            $.getJSON("https://labs.jstor.org/api/shakespeare/?similarity=[0.9%20TO%20*]&match_size=[18%20TO%20*]&play=" + play + "&facet=speaker.6,act.v&facet=act.v&facet=play,docid[unique]&facet=line.1,play_text.va",
+
+                    function(resp){
+                        console.log(resp);
+                        var data = [];
+                        var numberOfActs = resp.facets.act.values.length;
+                        var acts = [];
+                        var actsLabels = [];
+                        var characterLabels = [];
+                        var initialData = [];
+                        var finalData = [];
+                        var topSpeaker = resp.facets.speaker.values[0].val;
+                        var line = resp.facets.line.values[0].val;
+                        var lineArray = line.split((/\.(.*)/),2);
+                        var largestLine = chooseLine(resp.facets.line.values[0].play_text.values);
+                        $("#topChar").html(topSpeaker);
+                        $("#numOfArt").html((resp.facets.play.values[0].docid.stats.unique).toLocaleString());
+                        $("#topQuote").html('<a href="https://labs.jstor.org/shakespeare/' + lineArray[0] + '#line-' + lineArray[1] + '" target="_blank" id="topQuote" data-tooltip aria-haspopup="true" class="has-tip" title="Click to view accompanying JSTOR articles">' + largestLine + '...</a>');
+
+                        var unspecifiedTest = testforUnspecificied(resp.facets.speaker.values, 'unspecified');
+
+                        if(unspecifiedTest){
+                            (resp.facets.speaker.values).splice(unspecifiedTest,1);
+                        }
+                        else{
+                            (resp.facets.speaker.values).splice(5,1);
+                        }
+
+                        var numberOfSpeakers = resp.facets.speaker.values.length;
+
+                        for(var x = 0; x < numberOfActs; x++) {
+                            if(resp.facets.act.values[x].val == 0){
+                                actsLabels.push('Prologue');
+                            }
+                            else if(resp.facets.act.values[x].val == 6){
+                                actsLabels.push('Epilogue');
+                            }
+                            else {
+                                actsLabels.push('Act ' + resp.facets.act.values[x].val);
+                            }
+                            acts.push(resp.facets.act.values[x].val);
+                        }
+
+                        for (var i = 0; i < numberOfSpeakers; i++) {
+                            var title = toTitleCase(play.replace(/_/g, ' '));
+                            for(var a = 0; a < numberOfActs; a++){
+                                initialData.push({
+                                    key: i + '-' + a,
+                                    data: {
+                                        act: a,
+                                        character: i,
+                                        val: 0
+                                    }
+                                })
+                            }
+                            characterLabels.push(resp.facets.speaker.values[i].val);
+
+                            for(var j = 0; j < resp.facets.speaker.values[i].act.values.length; j++){
+                                var act = resp.facets.speaker.values[i].act.values[j].val;
+                                var actValue = resp.facets.speaker.values[i].act.values[j].count;
+                                finalData.push({
+                                    key: i + '-' + getAct(act, acts[0]),
+                                    data: {
+                                        act: getAct(act, acts[0]),
+                                        character: i,
+                                        val: actValue
+                                    }
+                                });
+
+                            }
+                        }
+                        $('.title').html(title);
+                        for(var u = 0; u < initialData.length; u++){
+                            for(var w = 0; w < finalData.length; w++){
+                                if(initialData[u].key == finalData[w].key){
+                                    initialData[u] = finalData[w];
+                                }
+                            }
+                            data.push([initialData[u].data.act, initialData[u].data.character, initialData[u].data.val]);
+                        }
+
+                        $(function () {
+
+                            var options = {
+
+                                chart: {
+                                    type: 'heatmap',
+                                    marginTop: 40,
+                                    marginBottom: 80,
+                                    plotBorderWidth: 1
+                                },
+
+
+                                title: {
+                                    text: '',
+                                    style: {
+                                        fontSize: '1.2em',
+                                        fontWeight: 'bold'
+                                    }
+                                },
+
+                                xAxis: {
+                                    categories: actsLabels,
+                                    title: {
+                                        text: title
+                                    }
+                                },
+
+                                yAxis: {
+                                    categories: characterLabels,
+                                    title: null,
+                                    minPadding: 0,
+                                    maxPadding: 0,
+                                    startOnTick: false,
+                                    endOnTick: false,
+                                    tickWidth: 1,
+                                    min: 0,
+                                },
+
+                                colorAxis: {
+                                    stops: [
+                                        [0, '#3060cf'],
+                                        [0.5, '#fffbbc'],
+                                        [1, '#c4463a']
+                                    ],
+                                },
+
+                                tooltip: {
+                                    enabled: false
+                                },
+
+                                legend: {
+                                    align: 'right',
+                                    layout: 'vertical',
+                                    margin: 0,
+                                    verticalAlign: 'top',
+                                    y: 25,
+                                    symbolHeight: 280
+                                },
+                                plotOptions: {
+                                    series: {
+                                        states: {
+                                            hover: {
+                                                enabled: false
+                                            }
+                                        }
+                                    }
+                                },
+
+                                series: [{
+                                    name: 'Articles per character',
+                                    borderWidth: 0,
+                                    data: data,
+                                    dataLabels: {
+                                        enabled: false,
+                                        color: '#000000'
+                                    }
+                                }]
+
+                            };
+                            // Column chart
+                            options.chart.renderTo = 'container';
+                            var chart1 = new Highcharts.Chart(options);
+                            if($( document ).width() < 980) {
+                                $('html,body').animate({scrollTop: 0}, 'fast');
+                            }
+                        });
+
+                    }
+            );
+
+        }
+    });
+
+
+</script>
+</body>
+</html>
